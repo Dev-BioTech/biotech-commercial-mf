@@ -14,18 +14,20 @@ export const commercialService = {
     }
   },
 
-  // GET /api/transactions - Get transactions (Query: farmId, type, date)
+  // GET /api/transactions - Get transactions (Query: fromDate, toDate, type, page, pageSize)
   getTransactions: async (filters = {}) => {
     try {
       const params = new URLSearchParams();
-      if (filters.farmId) params.append("farmId", filters.farmId);
+      if (filters.fromDate) params.append("fromDate", filters.fromDate);
+      if (filters.toDate) params.append("toDate", filters.toDate);
       if (filters.type) params.append("type", filters.type);
-      if (filters.date) params.append("date", filters.date);
+      if (filters.page) params.append("page", filters.page);
+      if (filters.pageSize) params.append("pageSize", filters.pageSize);
 
-      const url = params.toString()
-        ? `/transactions?${params.toString()}`
-        : "/transactions";
-      const response = await apiClient.get(url);
+      const qs = params.toString();
+      const response = await apiClient.get(
+        `/transactions${qs ? `?${qs}` : ""}`,
+      );
       return response.data;
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -84,7 +86,7 @@ export const commercialService = {
     try {
       const response = await apiClient.put(
         `/third-parties/${id}`,
-        thirdPartyData
+        thirdPartyData,
       );
       return response.data;
     } catch (error) {
