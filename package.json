@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview --port 5006 --strictPort"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

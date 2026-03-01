@@ -1,4 +1,4 @@
-import apiService from "@shared-services/ApiService";
+import apiClient from "../utils/apiClient";
 
 export const commercialService = {
   // ========== TRANSACTIONS ==========
@@ -6,7 +6,7 @@ export const commercialService = {
   // POST /api/transactions - Create a new transaction
   createTransaction: async (transactionData) => {
     try {
-      const response = await apiService.post("/transactions", transactionData);
+      const response = await apiClient.post("/transactions", transactionData);
       return response.data;
     } catch (error) {
       console.error("Error creating transaction:", error);
@@ -14,18 +14,20 @@ export const commercialService = {
     }
   },
 
-  // GET /api/transactions - Get transactions (Query: farmId, type, date)
+  // GET /api/transactions - Get transactions (Query: fromDate, toDate, type, page, pageSize)
   getTransactions: async (filters = {}) => {
     try {
       const params = new URLSearchParams();
-      if (filters.farmId) params.append("farmId", filters.farmId);
+      if (filters.fromDate) params.append("fromDate", filters.fromDate);
+      if (filters.toDate) params.append("toDate", filters.toDate);
       if (filters.type) params.append("type", filters.type);
-      if (filters.date) params.append("date", filters.date);
+      if (filters.page) params.append("page", filters.page);
+      if (filters.pageSize) params.append("pageSize", filters.pageSize);
 
-      const url = params.toString()
-        ? `/transactions?${params.toString()}`
-        : "/transactions";
-      const response = await apiService.get(url);
+      const qs = params.toString();
+      const response = await apiClient.get(
+        `/transactions${qs ? `?${qs}` : ""}`,
+      );
       return response.data;
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -36,7 +38,7 @@ export const commercialService = {
   // GET /api/transactions/{id} - Get transaction by ID
   getTransactionById: async (id) => {
     try {
-      const response = await apiService.get(`/transactions/${id}`);
+      const response = await apiClient.get(`/transactions/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching transaction ${id}:`, error);
@@ -47,7 +49,7 @@ export const commercialService = {
   // GET /api/transactions/{id}/animals - Get animals involved in a transaction
   getTransactionAnimals: async (id) => {
     try {
-      const response = await apiService.get(`/transactions/${id}/animals`);
+      const response = await apiClient.get(`/transactions/${id}/animals`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching animals for transaction ${id}:`, error);
@@ -58,7 +60,7 @@ export const commercialService = {
   // GET /api/transactions/{id}/products - Get products involved in a transaction
   getTransactionProducts: async (id) => {
     try {
-      const response = await apiService.get(`/transactions/${id}/products`);
+      const response = await apiClient.get(`/transactions/${id}/products`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching products for transaction ${id}:`, error);
@@ -71,7 +73,7 @@ export const commercialService = {
   // POST /api/third-parties - Create a third party (customer/supplier)
   createThirdParty: async (thirdPartyData) => {
     try {
-      const response = await apiService.post("/third-parties", thirdPartyData);
+      const response = await apiClient.post("/third-parties", thirdPartyData);
       return response.data;
     } catch (error) {
       console.error("Error creating third party:", error);
@@ -82,9 +84,9 @@ export const commercialService = {
   // PUT /api/third-parties/{id} - Update a third party
   updateThirdParty: async (id, thirdPartyData) => {
     try {
-      const response = await apiService.put(
+      const response = await apiClient.put(
         `/third-parties/${id}`,
-        thirdPartyData
+        thirdPartyData,
       );
       return response.data;
     } catch (error) {
@@ -96,7 +98,7 @@ export const commercialService = {
   // GET /api/third-parties - Get third parties
   getThirdParties: async () => {
     try {
-      const response = await apiService.get("/third-parties");
+      const response = await apiClient.get("/third-parties");
       return response.data;
     } catch (error) {
       console.error("Error fetching third parties:", error);
@@ -107,7 +109,7 @@ export const commercialService = {
   // GET /api/third-parties/{id} - Get third party by ID
   getThirdPartyById: async (id) => {
     try {
-      const response = await apiService.get(`/third-parties/${id}`);
+      const response = await apiClient.get(`/third-parties/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching third party ${id}:`, error);
