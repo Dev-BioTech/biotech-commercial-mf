@@ -32,8 +32,18 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("auth-storage");
-      window.dispatchEvent(new Event("auth-change"));
+      // Only clear session if there is genuinely no token.
+      // Resource-level 401s (farm context issues) must NOT log the user out.
+      try {
+        const parsed = JSON.parse(localStorage.getItem("auth-storage") || "{}");
+        if (!parsed?.state?.token) {
+          localStorage.removeItem("auth-storage");
+          window.dispatchEvent(new Event("auth-change"));
+        }
+      } catch {
+        localStorage.removeItem("auth-storage");
+        window.dispatchEvent(new Event("auth-change"));
+      }
     }
     return Promise.reject(error);
   },
