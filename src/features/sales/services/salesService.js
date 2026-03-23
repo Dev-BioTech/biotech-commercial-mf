@@ -1,47 +1,42 @@
 import apiClient from "@shared/utils/apiClient";
 
 /**
- * Sales Service — redirects to /api/transactions with type filter.
- * The backend does NOT have a separate /api/sales endpoint.
- * All sales are transactions, use type="sale" (or whatever the backend enum is).
+ * Sales Service
+ * Gateway route: /api/v1/sales/{everything}
+ * ⚠️ Requires backend: SalesController [Route("api/v1/sales")] + ocelot.json entry
  */
 export const salesService = {
-  // GET /api/transactions?type=sale
+  // GET /api/v1/sales
   getSales: async (filters = {}) => {
-    const response = await apiClient.get("/transactions", {
-      params: { ...filters, type: filters.type ?? "sale" },
-    });
-    return response.data;
+    const response = await apiClient.get("/v1/sales", { params: filters });
+    const data = response.data;
+    return Array.isArray(data) ? data : (data?.data ?? data?.items ?? []);
   },
 
-  // GET /api/transactions/{id}
+  // GET /api/v1/sales/{id}
   getSaleById: async (id) => {
-    const response = await apiClient.get(`/transactions/${id}`);
-    return response.data;
+    const response = await apiClient.get(`/v1/sales/${id}`);
+    return response.data?.data ?? response.data;
   },
 
-  // POST /api/transactions  (type: "sale" must be in the body)
+  // POST /api/v1/sales
   createSale: async (data) => {
-    const response = await apiClient.post("/transactions", {
-      ...data,
-      type: data.type ?? "sale",
-    });
-    return response.data;
+    const response = await apiClient.post("/v1/sales", data);
+    return response.data?.data ?? response.data;
   },
 
-  // No PUT/DELETE for transactions in the official API docs.
-  // These will return an error until the backend adds them.
+  // PUT /api/v1/sales/{id}
   updateSale: async (id, data) => {
-    console.warn("PUT /transactions/{id} not in API docs — may fail");
-    const response = await apiClient.put(`/transactions/${id}`, data);
-    return response.data;
+    const response = await apiClient.put(`/v1/sales/${id}`, data);
+    return response.data?.data ?? response.data;
   },
 
+  // DELETE /api/v1/sales/{id}
   deleteSale: async (id) => {
-    console.warn("DELETE /transactions/{id} not in API docs — may fail");
-    const response = await apiClient.delete(`/transactions/${id}`);
+    const response = await apiClient.delete(`/v1/sales/${id}`);
     return response.data;
   },
 };
 
 export default salesService;
+
