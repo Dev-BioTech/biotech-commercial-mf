@@ -1,6 +1,5 @@
 import Swal from "sweetalert2";
 
-
 // Custom base configuration
 const baseConfig = {
   customClass: {

@@ -28,8 +28,7 @@ export default defineConfig({
       name: "commercialMF",
       filename: "remoteEntry.js",
       exposes: {
-        "./CommercialDashboard":
-          "./src/features/dashboard/components/CommercialDashboard.jsx",
+        "./CommercialDashboard": "./src/App.jsx",
         "./SalesDashboard":
           "./src/features/sales/components/SalesDashboard.jsx",
         "./CommercialStore": "./src/shared/store/commercialStore.js",
