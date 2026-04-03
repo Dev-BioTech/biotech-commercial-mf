@@ -59,10 +59,12 @@ export const showConfirm = (
     icon: "warning",
     title,
     text: message,
-    iconColor: alertColors.warning,
+    iconColor: "#ef4444",
     showCancelButton: true,
     confirmButtonText: confirmText,
     cancelButtonText: cancelText,
+    confirmButtonColor: "#ef4444",
+    cancelButtonColor: "#6b7280",
     reverseButtons: true,
   });
 };
