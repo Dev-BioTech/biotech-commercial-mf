@@ -1,6 +1,5 @@
 import Swal from "sweetalert2";
 
-
 // Custom base configuration
 const baseConfig = {
   customClass: {
@@ -24,79 +23,53 @@ const alertColors = {
   question: "#8b5cf6",
 };
 
-// Success alert
+// Success alert (Unified)
 export const showSuccess = (message, title = "¡Éxito!") => {
-  return Swal.fire({
-    ...baseConfig,
-    icon: "success",
-    title,
-    text: message,
-    iconColor: alertColors.success,
-    confirmButtonText: "Aceptar",
-    timer: 3000,
-    timerProgressBar: true,
-  });
+  showToast(message, "success");
+  return Promise.resolve();
 };
 
-// Error alert
+// Error alert (Unified)
 export const showError = (message, title = "Error") => {
-  return Swal.fire({
-    ...baseConfig,
-    icon: "error",
-    title,
-    text: message,
-    iconColor: alertColors.error,
-    confirmButtonText: "Entendido",
-  });
+  showToast(message, "error");
+  return Promise.resolve();
 };
 
-// Warning alert
+// Warning alert (Unified)
 export const showWarning = (message, title = "Advertencia") => {
+  showToast(message, "warning");
+  return Promise.resolve();
+};
+
+// Info alert (Unified)
+export const showInfo = (message, title = "Información") => {
+  showToast(message, "info");
+  return Promise.resolve();
+};
+
+// Confirm alert (Updated for consistency)
+export const showConfirm = (
+  message,
+  title = "¿Confirmar acción?",
+  confirmText = "Sí, continuar",
+  cancelText = "No, volver"
+) => {
   return Swal.fire({
     ...baseConfig,
     icon: "warning",
     title,
     text: message,
-    iconColor: alertColors.warning,
-    confirmButtonText: "Aceptar",
-  });
-};
-
-// Info alert
-export const showInfo = (message, title = "Información") => {
-  return Swal.fire({
-    ...baseConfig,
-    icon: "info",
-    title,
-    text: message,
-    iconColor: alertColors.info,
-    confirmButtonText: "Entendido",
-    timer: 4000,
-    timerProgressBar: true,
-  });
-};
-
-// Confirm alert
-export const showConfirm = (
-  message,
-  title = "¿Estás seguro?",
-  confirmText = "Sí, confirmar",
-  cancelText = "Cancelar"
-) => {
-  return Swal.fire({
-    ...baseConfig,
-    icon: "question",
-    title,
-    text: message,
-    iconColor: alertColors.question,
+    iconColor: "#ef4444",
     showCancelButton: true,
     confirmButtonText: confirmText,
     cancelButtonText: cancelText,
+    confirmButtonColor: "#ef4444",
+    cancelButtonColor: "#6b7280",
     reverseButtons: true,
   });
 };
 
-// Delete confirm alert
+// Delete confirm alert (Unified)
 export const showDeleteConfirm = (
   itemName = "este elemento",
   message = "Esta acción no se puede deshacer"
@@ -111,7 +84,6 @@ export const showDeleteConfirm = (
     confirmButtonText: "Sí, eliminar",
     cancelButtonText: "Cancelar",
     reverseButtons: true,
-    confirmButtonColor: alertColors.error,
   });
 };
 
@@ -138,25 +110,13 @@ export const closeLoading = () => {
   Swal.close();
 };
 
-// Toast notification 
-export const showToast = (message, type = "success", position = "top-end") => {
-  const Toast = Swal.mixin({
-    toast: true,
-    position,
-    showConfirmButton: false,
-    timer: 3000,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-      toast.addEventListener("mouseenter", Swal.stopTimer);
-      toast.addEventListener("mouseleave", Swal.resumeTimer);
-    },
-  });
-
-  return Toast.fire({
-    icon: type,
-    title: message,
-    iconColor: alertColors[type] || alertColors.info,
-  });
+// Toast notification - Centralizada en el Shell
+export const showToast = (message, type = "success") => {
+  window.dispatchEvent(
+    new CustomEvent("biotech-toast", {
+      detail: { message, type },
+    })
+  );
 };
 
 // Custom alert
