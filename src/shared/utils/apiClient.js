@@ -12,15 +12,32 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("auth-storage");
-    if (token) {
+    const authStorage = localStorage.getItem("auth-storage");
+    if (authStorage) {
       try {
-        const authData = JSON.parse(token);
-        if (authData?.state?.token) {
-          config.headers.Authorization = `Bearer ${authData.state.token}`;
+        const parsed = JSON.parse(authStorage);
+        const token = parsed?.state?.token;
+        let rawFarmId = parsed?.state?.selectedFarm?.id;
+        let cleanFarmId = null;
+
+        if (rawFarmId) {
+          // Si el ID es una cadena como "35:1", nos quedamos solo con la parte numérica "35"
+          cleanFarmId = typeof rawFarmId === 'string' ? rawFarmId.split(":")[0] : rawFarmId;
+        }
+
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        if (cleanFarmId) {
+          config.headers["X-Farm-Id"] = cleanFarmId;
+          // Automáticamente inyectar farmId en GET params si no existe
+          if (config.method === "get") {
+            config.params = { ...config.params, farmId: cleanFarmId };
+          }
         }
       } catch (error) {
-        console.error("Error parsing auth token:", error);
+        console.error("Error parsing auth storage:", error);
       }
     }
     return config;
@@ -32,8 +49,15 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      // Si recibimos 401, el token expiró o es inválido.
+      // Cerraremos sesión para redirigir al login y limpiar el storage.
       localStorage.removeItem("auth-storage");
       window.dispatchEvent(new Event("auth-change"));
+      
+      // Intentar forzar redirección si estamos en el framework
+      if (window.location.pathname !== '/login') {
+         window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   },

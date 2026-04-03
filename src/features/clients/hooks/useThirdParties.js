@@ -1,40 +1,44 @@
-import { useState, useEffect } from "react";
-import { commercialService } from "../../../shared/services/commercialService";
+import { useState, useEffect, useCallback } from "react";
+import { commercialService } from "@/shared/services/commercialService";
 
-export const useThirdParties = () => {
+/**
+ * Hook to fetch and manage third parties (clients & suppliers).
+ * The apiClient automatically injects Authorization + X-Farm-Id + farmId query param.
+ */
+export const useThirdParties = (initialFilters = {}) => {
   const [thirdParties, setThirdParties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [farmId, setFarmId] = useState(null);
+  const [filters, setFilters] = useState(initialFilters);
 
-  useEffect(() => {
-    const authStorage = localStorage.getItem("auth-storage");
-    if (authStorage) {
-      try {
-        const parsed = JSON.parse(authStorage);
-        setFarmId(parsed?.state?.selectedFarm?.id);
-      } catch (e) {}
-    }
-  }, []);
-
-  const fetchThirdParties = async () => {
-    if (!farmId) return;
-
+  const fetchThirdParties = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const data = await commercialService.thirdParties.getAll({ farmId });
-      setThirdParties(data);
-      setError(null);
+      const data = await commercialService.getThirdParties({ ...filters, page: 1, pageSize: 1000 });
+      if (Array.isArray(data)) {
+        setThirdParties(data);
+      } else {
+        setThirdParties(data?.data ?? data?.items ?? []);
+      }
     } catch (err) {
+      console.error("[useThirdParties] Error:", err);
       setError("Error al cargar terceros.");
+      setThirdParties([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     fetchThirdParties();
-  }, [farmId]);
+  }, [fetchThirdParties]);
 
-  return { thirdParties, loading, error, refetch: fetchThirdParties, farmId };
+  return {
+    thirdParties,
+    loading,
+    error,
+    refetch: fetchThirdParties,
+    setFilters,
+  };
 };
